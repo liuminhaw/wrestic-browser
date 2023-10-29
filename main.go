@@ -27,7 +27,7 @@ func loadEnvConfig() (config, error) {
 	}
 
 	// TODO: Read the server value from an ENV variable
-	cfg.Server.Address = ":3000"
+	cfg.Server.Address = ":4000"
 
 	return cfg, nil
 }
@@ -39,9 +39,10 @@ func main() {
 	}
 
 	r := chi.NewRouter()
-	// fileServer := http.FileServer(http.Dir("./static"))
 	fileServer := http.FileServer(http.FS(static.FS))
-	r.Handle("/static/*", http.StripPrefix("/static", fileServer))
+	r.Get("/static/*", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.StripPrefix("/static", fileServer).ServeHTTP(w, r)
+	}))
 
 	tpl := views.Must(views.ParseFS(templates.FS, "tailwind.gohtml", "home.gohtml"))
 	r.Get("/", controllers.StaticHandler(tpl))
@@ -54,3 +55,11 @@ func main() {
 	}
 
 }
+
+// func TimerMiddleware(h http.HandlerFunc) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		start := time.Now()
+// 		h(w, r)
+// 		fmt.Println("Request time:", time.Since(start))
+// 	}
+// }
