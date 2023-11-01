@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/csrf"
 	"github.com/joho/godotenv"
 	"github.com/liuminhaw/wrestic-brw/controllers"
 	"github.com/liuminhaw/wrestic-brw/models"
@@ -15,7 +17,11 @@ import (
 )
 
 type config struct {
-	PSQL   models.PostgresConfig
+	PSQL models.PostgresConfig
+	CSRF struct {
+		Key    string
+		Secure bool
+	}
 	Server struct {
 		Address string // default localhost:3000
 	}
@@ -36,6 +42,15 @@ func loadEnvConfig() (config, error) {
 	cfg.PSQL.Password = os.Getenv("DB_PASSWORD")
 	cfg.PSQL.Database = os.Getenv("DB_DATABASE")
 	cfg.PSQL.SSLMode = os.Getenv("DB_SSLMODE")
+
+	// Read CSRF value
+	csrf_secure := os.Getenv("CSRF_SECURE")
+	csrf_secure_b, err := strconv.ParseBool(csrf_secure)
+	if err != nil {
+		return cfg, err
+	}
+	cfg.CSRF.Secure = csrf_secure_b
+	cfg.CSRF.Key = os.Getenv("CSRF_KEY")
 
 	// TODO: Read the server value from an ENV variable
 	cfg.Server.Address = ":4000"
@@ -61,10 +76,25 @@ func main() {
 	userService := &models.UserService{
 		DB: db,
 	}
+	sessionService := &models.SessionService{
+		DB: db,
+	}
+
+	// Setup middleware
+	umw := controllers.UserMiddleware{
+		SessionService: sessionService,
+	}
+
+	csrfMw := csrf.Protect(
+		[]byte(cfg.CSRF.Key),
+		csrf.Secure(cfg.CSRF.Secure),
+		csrf.Path("/"),
+	)
 
 	// Setup controllers
 	usersC := controllers.Users{
-		UserService: userService,
+		UserService:    userService,
+		SessionService: sessionService,
 	}
 	usersC.Templates.SignIn = views.Must(views.ParseFS(
 		templates.FS,
@@ -72,14 +102,24 @@ func main() {
 	))
 
 	r := chi.NewRouter()
+	r.Use(csrfMw)
+	r.Use(umw.SetUser)
+
 	fileServer := http.FileServer(http.FS(static.FS))
 	r.Get("/static/*", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		http.StripPrefix("/static", fileServer).ServeHTTP(w, r)
 	}))
 
+	r.Get("/", usersC.SignIn)
+	r.Post("/signin", usersC.ProcessSignIn)
+
 	tpl := views.Must(views.ParseFS(templates.FS, "tailwind.gohtml", "home.gohtml"))
-	r.Get("/", controllers.StaticHandler(tpl))
-	r.Get("/signin", usersC.SignIn)
+	r.Route("/hello", func(r chi.Router) {
+		r.Use(umw.RequireUser)
+		r.Get("/", controllers.StaticHandler(tpl))
+	})
+
+	// r.Get("/signin", usersC.SignIn)
 
 	// Start server
 	fmt.Printf("Starting the server on %s...", cfg.Server.Address)
