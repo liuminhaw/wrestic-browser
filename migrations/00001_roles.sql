@@ -2,7 +2,7 @@
 -- +goose StatementBegin
 CREATE TABLE roles (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    role VARCHAR(40) UNIQUE NOT NULL
+    "role" VARCHAR(40) UNIQUE NOT NULL CHECK ("role" IN ('admin','user'))
 );
 
 INSERT INTO roles (role)
