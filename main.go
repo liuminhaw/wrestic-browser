@@ -112,6 +112,7 @@ func main() {
 
 	r.Get("/", usersC.SignIn)
 	r.Post("/signin", usersC.ProcessSignIn)
+	r.Post("/signout", usersC.ProcessSignOut)
 
 	tpl := views.Must(views.ParseFS(templates.FS, "tailwind.gohtml", "home.gohtml"))
 	r.Route("/hello", func(r chi.Router) {

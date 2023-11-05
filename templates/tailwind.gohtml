@@ -14,10 +14,25 @@
     <!-- ... -->
   </head>
   <body class="flex flex-col min-h-screen bg-gray-100">
-    <!-- <header class="bg-gradient-to-r from-blue-400 to-green-400"> -->
     <header class="bg-gradient-to-b from-stone-300 to-gray-100">
-      <nav class="px-8 py-8 flex justify-center items-center">
-        <div class="text-4xl font-satisfy">Wrestic BRW</div>
+      <nav class="px-6 py-8 flex justify-between items-center">
+        <div class="basis-1/6"></div>
+        <div class="text-4xl font-satisfy text-center basis-5/6">
+          Wrestic BRW
+        </div>
+        <div class="basis-1/6 h-4/5 text-right">
+          {{if currentUser}}
+          <form action="/signout" method="post" class="inline pr-4">
+            <div class="hidden">{{csrfField}}</div>
+            <button
+              type="submit"
+              class="text-stone-600 hover:text-stone-800 hover:underline"
+            >
+              Sign out
+            </button>
+          </form>
+          {{end}}
+        </div>
       </nav>
     </header>
     {{template "page" .}}

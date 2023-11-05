@@ -11,6 +11,8 @@ import (
 	"path"
 
 	"github.com/gorilla/csrf"
+	"github.com/liuminhaw/wrestic-brw/context"
+	"github.com/liuminhaw/wrestic-brw/models"
 )
 
 func Must(t Template, err error) Template {
@@ -27,9 +29,9 @@ func ParseFS(fs fs.FS, patterns ...string) (Template, error) {
 			"csrfField": func() (template.HTML, error) {
 				return "", fmt.Errorf("csrfField not implemented")
 			},
-			// "currentUser": func() (template.HTML, error) {
-			// 	return "", fmt.Errorf("currentUser not implement")
-			// },
+			"currentUser": func() (template.HTML, error) {
+				return "", fmt.Errorf("currentUser not implement")
+			},
 			// "errors": func() []string {
 			// 	return nil
 			// },
@@ -61,9 +63,9 @@ func (t Template) Execute(w http.ResponseWriter, r *http.Request, data interface
 		"csrfField": func() template.HTML {
 			return csrf.TemplateField(r)
 		},
-		// "currentUser": func() *models.User {
-		// 	return context.User(r.Context())
-		// },
+		"currentUser": func() *models.User {
+			return context.User(r.Context())
+		},
 		// "errors": func() []string {
 		// 	return errMsgs
 		// },
