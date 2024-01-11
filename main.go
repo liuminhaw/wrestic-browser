@@ -100,6 +100,11 @@ func main() {
 		templates.FS,
 		"tailwind.gohtml", "signin.gohtml",
 	))
+	repositoriesC := controllers.Repositories{}
+	repositoriesC.Templates.New = views.Must(views.ParseFS(
+		templates.FS,
+		"tailwind.gohtml", "repositories/new.gohtml",
+	))
 
 	r := chi.NewRouter()
 	r.Use(csrfMw)
@@ -118,6 +123,11 @@ func main() {
 	r.Route("/hello", func(r chi.Router) {
 		r.Use(umw.RequireUser)
 		r.Get("/", controllers.StaticHandler(tpl))
+	})
+
+	r.Route("/repositories", func(r chi.Router) {
+		r.Use(umw.RequireUser)
+		r.Get("/new", repositoriesC.New)
 	})
 
 	// r.Get("/signin", usersC.SignIn)
