@@ -9,5 +9,9 @@ type Repositories struct {
 }
 
 func (rep Repositories) New(w http.ResponseWriter, r *http.Request) {
-	rep.Templates.New.Execute(w, r, nil)
+	var data struct {
+		JsFiles []string
+	}
+	data.JsFiles = append(data.JsFiles, "/static/js/new-repository.js")
+	rep.Templates.New.Execute(w, r, data)
 }

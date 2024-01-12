@@ -98,7 +98,7 @@ func main() {
 	}
 	usersC.Templates.SignIn = views.Must(views.ParseFS(
 		templates.FS,
-		"tailwind.gohtml", "signin.gohtml",
+		"tailwind.gohtml", "default.gohtml", "signin.gohtml",
 	))
 	repositoriesC := controllers.Repositories{}
 	repositoriesC.Templates.New = views.Must(views.ParseFS(
@@ -119,7 +119,7 @@ func main() {
 	r.Post("/signin", usersC.ProcessSignIn)
 	r.Post("/signout", usersC.ProcessSignOut)
 
-	tpl := views.Must(views.ParseFS(templates.FS, "tailwind.gohtml", "home.gohtml"))
+	tpl := views.Must(views.ParseFS(templates.FS, "tailwind.gohtml", "default.gohtml", "home.gohtml"))
 	r.Route("/hello", func(r chi.Router) {
 		r.Use(umw.RequireUser)
 		r.Get("/", controllers.StaticHandler(tpl))
