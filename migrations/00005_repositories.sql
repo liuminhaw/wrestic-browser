@@ -3,9 +3,12 @@
 CREATE TABLE repositories (
     id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     "name" VARCHAR(255) UNIQUE NOT NULL,
-    "type" VARCHAR(40) UNIQUE NOT NULL CHECK ("type" IN ('local','sftp','s3')),
     "destination" TEXT NOT NULL,
-    "password_enc" VARCHAR(255) NOT NULL
+    "password_enc" VARCHAR(255) NOT NULL,
+    "type_id" INT NOT NULL,
+    CONSTRAINT fk_types
+        FOREIGN KEY ("type_id") REFERENCES repository_types(id)
+        ON DELETE CASCADE
 );
 -- +goose StatementEnd
 

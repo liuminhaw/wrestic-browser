@@ -20,7 +20,7 @@
           id="type"
           placeholder="Repository type"
           required
-          class="w-full px-2 py-3 bg-white border border-gray-300 placeholder-gray-400 text-gray-800 rounded"
+          class="w-full px-2 py-2 bg-white border border-gray-300 placeholder-gray-400 text-gray-800 rounded"
         >
           <option value="local">local</option>
           <option value="s3">s3</option>
@@ -66,96 +66,46 @@
           required
         />
       </div>
-      <div id="s3-config" class="hidden">
+      {{range .FormInputs}}
+      <div id="{{.Type}}-config" class="hidden">
+        {{if .Description}}
         <h2 class="pt-4 pb-1 text-lg font-semibold text-gray-700">
-          S3 access configuration
+          {{.Description}}
         </h2>
         <hr class="bg-stone-400 h-0.5 rounded" />
-        <div class="pt-4 py-2">
-          <label for="access-key" class="text-sm font-semibold text-gray-700"
-            >Access Key Id</label
-          >
-          <input
-            name="access-key"
-            id="access-key"
-            type="text"
-            placeholder="S3 credential access key id"
-            class="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-800 rounded"
-            required
-          />
-        </div>
-        <div class="py-2">
-          <label for="secret-key" class="text-sm font-semibold text-gray-700"
-            >Secret Access Key</label
-          >
-          <input
-            name="secret-key"
-            id="secret-key"
-            type="pasword"
-            placeholder="S3 credential secret access key"
-            class="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-800 rounded"
-            required
-          />
-        </div>
-        <div class="py-2">
-          <label for="aws-region" class="text-sm font-semibold text-gray-700"
-            >Region</label
-          >
-          <input
-            name="aws-region"
-            id="aws-region"
-            type="text"
-            placeholder="AWS region"
-            class="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-800 rounded"
-            required
-          />
-        </div>
-      </div>
-      <div id="sftp-config" class="hidden">
-        <h2 class="pt-4 pb-1 text-lg font-semibold text-gray-700">
-          SFTP configuration
-        </h2>
-        <hr class="bg-stone-400 h-0.5 rounded" />
-        <div class="pt-4 py-2">
-          <label for="sftp-user" class="text-sm font-semibold text-gray-700"
-            >User</label
-          >
-          <input
-            name="sftp-user"
-            id="sftp-user"
-            type="text"
-            placeholder="sftp user"
-            class="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-800 rounded"
-            required
-          />
-        </div>
-        <div class="py-2">
-          <label for="sftp-host" class="text-sm font-semibold text-gray-700"
-            >Host</label
-          >
-          <input
-            name="sftp-host"
-            id="sftp-host"
-            type="text"
-            placeholder="sftp host"
-            class="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-800 rounded"
-            required
-          />
-        </div>
-        <div class="py-2">
-          <label for="sftp-pem" class="text-sm font-semibold text-gray-700"
-            >Pem file</label
-          >
+        {{end}}
+        {{range $index, $option := .Options}}
+          {{if (eq $index 0)}}
+          <div class="pt-4 py-2">
+          {{else}}
+          <div class="py-2">
+          {{end}}
+          <label for="{{.Name}}" class="text-sm font-semibold text-gray-700">
+            {{.Label}}
+          </label>
+          {{if (isEqual .Type "textarea")}}
           <textarea
-            id="sftp-pem"
-            name="sftp-pem"
+            name="{{.Name}}"
+            id="{{.Name}}"
             rows="8"
-            placeholder="pem file content"
+            placeholder="{{.Placeholder}}"
             class="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-800 rounded"
             required
           ></textarea>
-        </div>
+          {{else}}
+          <input 
+            name="{{.Name}}" 
+            id="{{.Name}}" 
+            type="{{.Type}}" 
+            placeholder="{{.Placeholder}}" 
+            class="w-full px-3 py-2 border border-gray-300 placeholder-gray-400 text-gray-800 rounded" 
+            required 
+          />
+          {{end}}
+          </div>
+        {{end}}
       </div>
+      {{end}}
       <div class="py-4">
         <button
           type="submit"
