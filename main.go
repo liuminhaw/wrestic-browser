@@ -79,6 +79,9 @@ func main() {
 	sessionService := &models.SessionService{
 		DB: db,
 	}
+	repositoryService := &models.RepositoryService{
+		DB: db,
+	}
 
 	// Setup middleware
 	umw := controllers.UserMiddleware{
@@ -100,7 +103,9 @@ func main() {
 		templates.FS,
 		"tailwind.gohtml", "default.gohtml", "signin.gohtml",
 	))
-	repositoriesC := controllers.Repositories{}
+	repositoriesC := controllers.Repositories{
+		RepositoryService: repositoryService,
+	}
 	repositoriesC.Templates.New = views.Must(views.ParseFS(
 		templates.FS,
 		"tailwind.gohtml", "repositories/new.gohtml",

@@ -22,9 +22,9 @@
           required
           class="w-full px-2 py-2 bg-white border border-gray-300 placeholder-gray-400 text-gray-800 rounded"
         >
-          <option value="local">local</option>
-          <option value="s3">s3</option>
-          <option value="sftp">sftp</option>
+          {{range .RepoTypes}}
+          <option value="{{.Name}}">{{.Name}}</option>
+          {{end}}
         </select>
       </div>
       <div class="py-2">
