@@ -39,3 +39,9 @@ func (rep Repositories) New(w http.ResponseWriter, r *http.Request) {
 
 	rep.Templates.New.Execute(w, r, data)
 }
+
+func (rep Repositories) Create(w http.ResponseWriter, r *http.Request) {
+	message := "POST /repositories for creating new repository connection"
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintf(w, message)
+}

@@ -132,6 +132,7 @@ func main() {
 
 	r.Route("/repositories", func(r chi.Router) {
 		r.Use(umw.RequireUser)
+		r.Post("/", repositoriesC.Create)
 		r.Get("/new", repositoriesC.New)
 	})
 
