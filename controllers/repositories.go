@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/liuminhaw/wrestic-brw/models"
+	"github.com/liuminhaw/wrestic-brw/restic"
 	"github.com/liuminhaw/wrestic-brw/views"
 )
 
@@ -41,7 +42,45 @@ func (rep Repositories) New(w http.ResponseWriter, r *http.Request) {
 }
 
 func (rep Repositories) Create(w http.ResponseWriter, r *http.Request) {
-	message := "POST /repositories for creating new repository connection"
+	repoType := r.FormValue("type")
+
+	var repository restic.Repository
+	switch repoType {
+	case "local":
+		repository = &restic.LocalRepository{
+			Password:    r.FormValue("password"),
+			Destination: r.FormValue("destination"),
+		}
+	case "s3":
+		repository = &restic.S3Repository{
+			Password:        r.FormValue("password"),
+			Destination:     r.FormValue("destination"),
+			AccessKeyId:     r.FormValue("access-key"),
+			SecretAccessKey: r.FormValue("secret-key"),
+		}
+	case "sftp":
+		repository = &restic.SftpRepository{
+			Password:    r.FormValue("password"),
+			Destination: r.FormValue("destination"),
+			User:        r.FormValue("sftp-user"),
+			Host:        r.FormValue("sftp-host"),
+			Pem:         r.FormValue("sftp-pem"),
+		}
+	default:
+		// TODO: direct back to current page and show error message
+		message := fmt.Sprintf("Repository type: %s not supported", repoType)
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, message)
+		return
+	}
+
+	// Check repository connection
+	if err := repository.Connect(); err != nil {
+		fmt.Printf("Connection failed: %s\n", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprintf(w, "Failed to connect to repository")
+		return
+	}
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, message)
+	fmt.Fprintf(w, "Connection test success")
 }

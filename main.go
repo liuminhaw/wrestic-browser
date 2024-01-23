@@ -11,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/liuminhaw/wrestic-brw/controllers"
 	"github.com/liuminhaw/wrestic-brw/models"
+	"github.com/liuminhaw/wrestic-brw/restic"
 	"github.com/liuminhaw/wrestic-brw/static"
 	"github.com/liuminhaw/wrestic-brw/templates"
 	"github.com/liuminhaw/wrestic-brw/views"
@@ -59,6 +60,12 @@ func loadEnvConfig() (config, error) {
 }
 
 func main() {
+	// Check restic command
+	if err := restic.ResticCheck(); err != nil {
+		fmt.Printf("restic command not found: %s\n", err)
+		os.Exit(1)
+	}
+
 	cfg, err := loadEnvConfig()
 	if err != nil {
 		panic(err)
@@ -140,10 +147,12 @@ func main() {
 
 	// Start server
 	fmt.Printf("Starting the server on %s...", cfg.Server.Address)
-	err = http.ListenAndServe(cfg.Server.Address, r)
-	if err != nil {
-		panic(err)
+	// err = http.ListenAndServe(cfg.Server.Address, r)
+	server := &http.Server{
+		Addr:    cfg.Server.Address,
+		Handler: r,
 	}
+	err = server.ListenAndServe()
 
 }
 

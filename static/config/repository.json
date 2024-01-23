@@ -12,7 +12,7 @@
       {
         "name": "secret-key",
         "label": "Secret Access Key",
-        "type": "text",
+        "type": "password",
         "placeholder": "S3 credential secret access key"
       },
       {
