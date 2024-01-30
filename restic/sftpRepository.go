@@ -2,6 +2,7 @@ package restic
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"os"
 	"os/exec"
@@ -9,14 +10,17 @@ import (
 )
 
 type SftpRepository struct {
+	Id          int
+	Name        string
 	Password    string
 	Destination string
 	User        string
 	Host        string
 	Pem         string
+	ConfigId    int
 }
 
-func (r *SftpRepository) Connect() error {
+func (r *SftpRepository) connect() error {
 	os.Setenv(passwordEnv, r.Password)
 
 	// Create pem temporary pem file
@@ -88,6 +92,37 @@ func (r *SftpRepository) Connect() error {
 	}
 	if err != nil {
 		return fmt.Errorf("restic connect: %s: %w", output, err)
+	}
+
+	return nil
+}
+
+func (r *SftpRepository) newRepo(DB *sql.DB) error {
+	// TODO: turn two queries into transaction to ensure data is inserted atomically
+	// TODO: encrypt password before inserting to database
+	row := DB.QueryRow(`
+		INSERT INTO "repositories" ("name", "destination", "password_enc", "type_id")
+		VALUES ($1, $2, $3, (
+			SELECT "id"
+			FROM "repository_types"
+			WHERE "name" = $4
+		))
+		RETURNING ID;
+	`, r.Name, r.Destination, r.Password, sftpType)
+	err := row.Scan(&r.Id)
+	if err != nil {
+		return fmt.Errorf("create sftp repository: %w", err)
+	}
+
+	// TODO: encrypt pem before inserting to database
+	row = DB.QueryRow(`
+		INSERT INTO "sftp_repository_configs" ("user", "host", "pem_enc", "repository_id")		
+		VALUES ($1, $2, $3, $4)
+		RETURNING ID;
+	`, r.User, r.Host, r.Pem, r.Id)
+	err = row.Scan(&r.ConfigId)
+	if err != nil {
+		return fmt.Errorf("create sftp repository config: %w", err)
 	}
 
 	return nil

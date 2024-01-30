@@ -15,8 +15,8 @@ const (
 )
 
 type Repository interface {
-	Connect() error
-	// NewRepo() error
+	connect() error
+	newRepo(*sql.DB) error
 }
 
 type RepositoryService struct {
@@ -49,4 +49,20 @@ func (service *RepositoryService) Types() ([]string, error) {
 	}
 
 	return repoTypes, nil
+}
+
+func (service *RepositoryService) Connect() error {
+	if err := service.Repository.connect(); err != nil {
+		return fmt.Errorf("repository connect failed: %w", err)
+	}
+
+	return nil
+}
+
+func (service *RepositoryService) Create() error {
+	if err := service.Repository.newRepo(service.DB); err != nil {
+		return fmt.Errorf("create repository: %w", err)
+	}
+
+	return nil
 }

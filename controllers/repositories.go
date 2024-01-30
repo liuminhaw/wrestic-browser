@@ -43,22 +43,25 @@ func (rep Repositories) New(w http.ResponseWriter, r *http.Request) {
 func (rep Repositories) Create(w http.ResponseWriter, r *http.Request) {
 	repoType := r.FormValue("type")
 
-	var repository restic.Repository
 	switch repoType {
 	case "local":
-		repository = &restic.LocalRepository{
+		rep.RepositoryService.Repository = &restic.LocalRepository{
+			Name:        r.FormValue("name"),
 			Password:    r.FormValue("password"),
 			Destination: r.FormValue("destination"),
 		}
 	case "s3":
-		repository = &restic.S3Repository{
+		rep.RepositoryService.Repository = &restic.S3Repository{
+			Name:            r.FormValue("name"),
 			Password:        r.FormValue("password"),
 			Destination:     r.FormValue("destination"),
 			AccessKeyId:     r.FormValue("access-key"),
 			SecretAccessKey: r.FormValue("secret-key"),
+			Region:          r.FormValue("aws-region"),
 		}
 	case "sftp":
-		repository = &restic.SftpRepository{
+		rep.RepositoryService.Repository = &restic.SftpRepository{
+			Name:        r.FormValue("name"),
 			Password:    r.FormValue("password"),
 			Destination: r.FormValue("destination"),
 			User:        r.FormValue("sftp-user"),
@@ -74,11 +77,17 @@ func (rep Repositories) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check repository connection
-	if err := repository.Connect(); err != nil {
+	if err := rep.RepositoryService.Connect(); err != nil {
 		// TODO: Direct back to repository new page and show error message
 		fmt.Printf("Connection failed: %s\n", err)
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprintf(w, "Failed to connect to repository")
+		return
+	}
+	if err := rep.RepositoryService.Create(); err != nil {
+		fmt.Printf("Create new repository failed: %s\n", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprintf(w, "Failed to create new repository")
 		return
 	}
 	w.WriteHeader(http.StatusOK)

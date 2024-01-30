@@ -2,6 +2,7 @@ package restic
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"os"
 	"os/exec"
@@ -9,11 +10,14 @@ import (
 )
 
 type LocalRepository struct {
+	Id          int
+	Name        string
 	Password    string
 	Destination string
 }
 
-func (r *LocalRepository) Connect() error {
+// Connect test if connection can be established using local directory as backup repository
+func (r *LocalRepository) connect() error {
 	os.Setenv(passwordEnv, r.Password)
 
 	commandArg := []string{"cat", "config", "-r", r.Destination}
@@ -28,6 +32,25 @@ func (r *LocalRepository) Connect() error {
 	}
 	if err != nil {
 		return fmt.Errorf("restic connect: %w", err)
+	}
+
+	return nil
+}
+
+func (r *LocalRepository) newRepo(DB *sql.DB) error {
+	// TODO: encrypt password before inserting to database
+	row := DB.QueryRow(`
+		INSERT INTO "repositories" ("name", "destination", "password_enc", "type_id")
+		VALUES ($1, $2, $3, (
+			SELECT "id"
+			FROM "repository_types"
+			WHERE "name" = $4
+		))		
+		RETURNING ID;
+	`, r.Name, r.Destination, r.Password, localType)
+	err := row.Scan(&r.Id)
+	if err != nil {
+		return fmt.Errorf("create local repository: %w", err)
 	}
 
 	return nil
