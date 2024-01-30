@@ -86,7 +86,7 @@ func main() {
 	sessionService := &models.SessionService{
 		DB: db,
 	}
-	repositoryService := &models.RepositoryService{
+	repositoryService := &restic.RepositoryService{
 		DB: db,
 	}
 

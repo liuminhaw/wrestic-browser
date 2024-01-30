@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/liuminhaw/wrestic-brw/models"
 	"github.com/liuminhaw/wrestic-brw/restic"
 	"github.com/liuminhaw/wrestic-brw/views"
 )
@@ -14,14 +13,14 @@ type Repositories struct {
 		New Template
 	}
 
-	RepositoryService *models.RepositoryService
+	RepositoryService *restic.RepositoryService
 }
 
 func (rep Repositories) New(w http.ResponseWriter, r *http.Request) {
 	var data struct {
 		JsFiles    []string
 		FormInputs []views.RepositoryConfig
-		RepoTypes  []models.RepositoryTypes
+		RepoTypes  []string
 	}
 	formInputs, err := views.NewRepositoryConfigs()
 	if err != nil {
@@ -76,11 +75,13 @@ func (rep Repositories) Create(w http.ResponseWriter, r *http.Request) {
 
 	// Check repository connection
 	if err := repository.Connect(); err != nil {
+		// TODO: Direct back to repository new page and show error message
 		fmt.Printf("Connection failed: %s\n", err)
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprintf(w, "Failed to connect to repository")
 		return
 	}
 	w.WriteHeader(http.StatusOK)
+	// TODO: Write repository config to database
 	fmt.Fprintf(w, "Connection test success")
 }
