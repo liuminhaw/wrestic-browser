@@ -19,7 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-package cmd
+package password
 
 import (
 	"fmt"
@@ -29,42 +29,39 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// hashCmd represents the hash command
-var hashCmd = &cobra.Command{
-	Use:   "hash PASSWORD",
-	Short: "Given a password and returns it hashed value",
+// compareCmd represents the compare command
+var compareCmd = &cobra.Command{
+	Use:   "compare PASSWORD HASH",
+	Short: "Compare plaintext password with bcrypt hashed value",
 	Long:  ``,
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
-		passwordHash, err := hash(args[0])
-		if err != nil {
-			fmt.Println("Hash error: ", err)
+		if !compare(args[0], args[1]) {
+			fmt.Printf("Pasword: %q does not match with hash %q\n", args[0], args[1])
 			os.Exit(1)
 		}
-		fmt.Printf("Hashed password: %s\n", passwordHash)
+		fmt.Println("Password match with hash")
 	},
 }
 
 func init() {
-	passwordCmd.AddCommand(hashCmd)
+	PasswordCmd.AddCommand(compareCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// hashCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// compareCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// hashCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// compareCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-// hash given password using bcrypt hash
-func hash(password string) (string, error) {
-	hashedBytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return "", fmt.Errorf("hash: %w", err)
+// compare if plaintext password and given hash matches
+func compare(password, hash string) bool {
+	if err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)); err != nil {
+		return false
 	}
-
-	return string(hashedBytes), err
+	return true
 }

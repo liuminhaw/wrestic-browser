@@ -19,16 +19,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-package cmd
+package admin
 
 import (
 	"github.com/spf13/cobra"
 )
 
 // adminCmd represents the admin command
-var adminCmd = &cobra.Command{
+var AdminCmd = &cobra.Command{
 	Use:   "admin",
-	Short: "Perform admin related command",
+	Short: "Perform administrator related command",
 	Long:  ``,
 	// Run: func(cmd *cobra.Command, args []string) {
 	// 	fmt.Println("admin called")
@@ -36,8 +36,6 @@ var adminCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(adminCmd)
-
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

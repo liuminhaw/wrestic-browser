@@ -19,7 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-package cmd
+package admin
 
 import (
 	"fmt"
@@ -27,6 +27,7 @@ import (
 	"syscall"
 
 	"github.com/joho/godotenv"
+	"github.com/liuminhaw/wrestic-brw/cobra/cmd/password"
 	"github.com/liuminhaw/wrestic-brw/models"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
@@ -74,7 +75,7 @@ var createCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		passwordHash, err := hash(string(bytePassword))
+		passwordHash, err := password.Hash(string(bytePassword))
 		if err != nil {
 			fmt.Printf("Failed to hash password: %v\n", err)
 			os.Exit(1)
@@ -95,7 +96,7 @@ var createCmd = &cobra.Command{
 }
 
 func init() {
-	adminCmd.AddCommand(createCmd)
+	AdminCmd.AddCommand(createCmd)
 
 	// Here you will define your flags and configuration settings.
 
