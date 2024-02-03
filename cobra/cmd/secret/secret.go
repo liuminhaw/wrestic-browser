@@ -1,11 +1,11 @@
 package secret
 
 import (
-	"encoding/base64"
 	"fmt"
 	"os"
 
 	"github.com/liuminhaw/wrestic-brw/utils/dotenv"
+	"github.com/liuminhaw/wrestic-brw/utils/encryptor"
 	"github.com/spf13/cobra"
 )
 
@@ -43,7 +43,7 @@ func loadEncKey() ([32]byte, error) {
 	if encKey == "" {
 		return [32]byte{}, fmt.Errorf("load enc key: empty enc key")
 	}
-	encKeyBytes, err := base64.URLEncoding.DecodeString(encKey)
+	encKeyBytes, err := encryptor.UrlDecodeKey(encKey)
 	if err != nil {
 		return [32]byte{}, fmt.Errorf("load enc key: decode enc key: %w", err)
 	}
@@ -55,7 +55,7 @@ func loadEncKey() ([32]byte, error) {
 // It decodes the key using base64.URLEncoding and returns the key as a [32]byte.
 // If there is an error decoding the key, it returns an empty [32]byte and an error.
 func toEncKey(key string) ([32]byte, error) {
-	encKeyBytes, err := base64.URLEncoding.DecodeString(key)
+	encKeyBytes, err := encryptor.UrlDecodeKey(key)
 	if err != nil {
 		return [32]byte{}, fmt.Errorf("toEncKey: decode key: %w", err)
 	}

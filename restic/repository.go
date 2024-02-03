@@ -17,15 +17,17 @@ const (
 type Repository interface {
 	connect() error
 	newRepo(*sql.DB) error
+	GenEnc([32]byte) error
 }
 
+// RepositoryService represents a service that interacts with a repository.
 type RepositoryService struct {
-	DB *sql.DB
-
-	Repository Repository
+	DB         *sql.DB    // DB is the database connection.
+	EncKey     [32]byte   // EncKey is the encryption key used for the repository.
+	Repository Repository // Repository is the underlying repository.
 }
 
-// Types query and return all available repository types from respository_types table
+// Types returns a list of repository types.
 func (service *RepositoryService) Types() ([]string, error) {
 	rows, err := service.DB.Query(`
 		SELECT name
@@ -51,6 +53,8 @@ func (service *RepositoryService) Types() ([]string, error) {
 	return repoTypes, nil
 }
 
+// Connect establishes a connection to the repository.
+// It returns an error if the connection fails.
 func (service *RepositoryService) Connect() error {
 	if err := service.Repository.connect(); err != nil {
 		return fmt.Errorf("repository connect failed: %w", err)
@@ -59,6 +63,9 @@ func (service *RepositoryService) Connect() error {
 	return nil
 }
 
+// Create creates a new repository.
+// It calls the newRepo method of the RepositoryService to initialize the repository.
+// If an error occurs during the creation process, it returns an error with a formatted message.
 func (service *RepositoryService) Create() error {
 	if err := service.Repository.newRepo(service.DB); err != nil {
 		return fmt.Errorf("create repository: %w", err)

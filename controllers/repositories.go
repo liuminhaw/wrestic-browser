@@ -49,6 +49,7 @@ func (rep Repositories) Create(w http.ResponseWriter, r *http.Request) {
 			Name:        r.FormValue("name"),
 			Password:    r.FormValue("password"),
 			Destination: r.FormValue("destination"),
+			Encryption:  &restic.LocalRepositoryEnc{},
 		}
 	case "s3":
 		rep.RepositoryService.Repository = &restic.S3Repository{
@@ -58,6 +59,7 @@ func (rep Repositories) Create(w http.ResponseWriter, r *http.Request) {
 			AccessKeyId:     r.FormValue("access-key"),
 			SecretAccessKey: r.FormValue("secret-key"),
 			Region:          r.FormValue("aws-region"),
+			Encryption:      &restic.S3RepositoryEnc{},
 		}
 	case "sftp":
 		rep.RepositoryService.Repository = &restic.SftpRepository{
@@ -67,13 +69,20 @@ func (rep Repositories) Create(w http.ResponseWriter, r *http.Request) {
 			User:        r.FormValue("sftp-user"),
 			Host:        r.FormValue("sftp-host"),
 			Pem:         r.FormValue("sftp-pem"),
+			Encryption:  &restic.SftpRepositoryEnc{},
 		}
 	default:
 		// TODO: direct back to current page and show error message
 		message := fmt.Sprintf("Repository type: %s not supported", repoType)
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, message)
+		fmt.Fprint(w, message)
 		return
+	}
+	// Generate encrypted data
+	if err := rep.RepositoryService.Repository.GenEnc(rep.RepositoryService.EncKey); err != nil {
+		fmt.Printf("Generate repository encrypted data failed: %s\n", err)
+		w.WriteHeader(http.StatusServiceUnavailable)
+		fmt.Fprint(w, "Server Error")
 	}
 
 	// Check repository connection
@@ -91,6 +100,5 @@ func (rep Repositories) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-	// TODO: Write repository config to database
 	fmt.Fprintf(w, "Connection test success")
 }

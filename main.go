@@ -8,12 +8,13 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/csrf"
-	"github.com/joho/godotenv"
 	"github.com/liuminhaw/wrestic-brw/controllers"
 	"github.com/liuminhaw/wrestic-brw/models"
 	"github.com/liuminhaw/wrestic-brw/restic"
 	"github.com/liuminhaw/wrestic-brw/static"
 	"github.com/liuminhaw/wrestic-brw/templates"
+	"github.com/liuminhaw/wrestic-brw/utils/dotenv"
+	"github.com/liuminhaw/wrestic-brw/utils/encryptor"
 	"github.com/liuminhaw/wrestic-brw/views"
 )
 
@@ -26,12 +27,15 @@ type config struct {
 	Server struct {
 		Address string // default localhost:3000
 	}
+	Encryption struct {
+		Key [32]byte
+	}
 }
 
 // loadEnvConfig loads config setting from .env file
 func loadEnvConfig() (config, error) {
 	var cfg config
-	err := godotenv.Load()
+	err := dotenv.LoadDotEnv()
 	if err != nil {
 		return cfg, err
 	}
@@ -52,6 +56,14 @@ func loadEnvConfig() (config, error) {
 	}
 	cfg.CSRF.Secure = csrf_secure_b
 	cfg.CSRF.Key = os.Getenv("CSRF_KEY")
+
+	// Read encryption key
+	encKey := os.Getenv("ENC_KEY")
+	encKeyBytes, err := encryptor.UrlDecodeKey(encKey)
+	if err != nil {
+		return cfg, fmt.Errorf("load env config: decode enc key: %w", err)
+	}
+	cfg.Encryption.Key = encKeyBytes
 
 	// TODO: Read the server value from an ENV variable
 	cfg.Server.Address = ":4000"
@@ -87,7 +99,8 @@ func main() {
 		DB: db,
 	}
 	repositoryService := &restic.RepositoryService{
-		DB: db,
+		DB:     db,
+		EncKey: cfg.Encryption.Key,
 	}
 
 	// Setup middleware
