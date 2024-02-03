@@ -25,3 +25,6 @@ go.work
 
 # helix editor
 .ignore
+
+# Executable
+brwcli

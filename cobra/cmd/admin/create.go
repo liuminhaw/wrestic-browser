@@ -26,9 +26,9 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/joho/godotenv"
 	"github.com/liuminhaw/wrestic-brw/cobra/cmd/password"
 	"github.com/liuminhaw/wrestic-brw/models"
+	"github.com/liuminhaw/wrestic-brw/utils/dotenv"
 	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
@@ -39,7 +39,7 @@ var createCmd = &cobra.Command{
 	Short: "Create admin account",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		cfg, err := loadEnvConfig("../.env")
+		cfg, err := loadEnvConfig()
 		if err != nil {
 			fmt.Printf("Failed to load dotenv: %v\n", err)
 			os.Exit(1)
@@ -114,9 +114,9 @@ type config struct {
 }
 
 // loadEnvConfig loads config settings from .env file
-func loadEnvConfig(filenames ...string) (config, error) {
+func loadEnvConfig() (config, error) {
 	var cfg config
-	err := godotenv.Load(filenames...)
+	err := dotenv.LoadDotEnv()
 	if err != nil {
 		return cfg, fmt.Errorf("load env config: %w", err)
 	}

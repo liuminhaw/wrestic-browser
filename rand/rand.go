@@ -6,6 +6,8 @@ import (
 	"fmt"
 )
 
+// Bytes returns a random byte slice using crypto/rand
+// n is the number of bytes being used to generate the random byte slice
 func Bytes(n int) ([]byte, error) {
 	b := make([]byte, n)
 	nRead, err := rand.Read(b)

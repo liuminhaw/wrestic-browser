@@ -26,10 +26,9 @@ import (
 
 	"github.com/liuminhaw/wrestic-brw/cobra/cmd/admin"
 	"github.com/liuminhaw/wrestic-brw/cobra/cmd/password"
+	"github.com/liuminhaw/wrestic-brw/cobra/cmd/secret"
 	"github.com/spf13/cobra"
 )
-
-var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -46,6 +45,7 @@ var rootCmd = &cobra.Command{
 func Execute() {
 	rootCmd.AddCommand(admin.AdminCmd)
 	rootCmd.AddCommand(password.PasswordCmd)
+	rootCmd.AddCommand(secret.SecretCmd)
 
 	err := rootCmd.Execute()
 	if err != nil {
