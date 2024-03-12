@@ -10,10 +10,15 @@ import (
 
 type Repositories struct {
 	Templates struct {
-		New Template
+		New   Template
+		Index Template
 	}
 
 	RepositoryService *restic.RepositoryService
+}
+
+func (rep Repositories) Index(w http.ResponseWriter, r *http.Request) {
+	rep.Templates.Index.Execute(w, r, nil)
 }
 
 func (rep Repositories) New(w http.ResponseWriter, r *http.Request) {

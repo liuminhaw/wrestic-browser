@@ -1,50 +1,50 @@
 [
-  {
-    "type": "s3",
-    "description": "S3 access configuration",
-    "options": [
-      {
-        "name": "access-key",
-        "label": "Access Key Id",
-        "type": "text",
-        "placeholder": "S3 credential access key id"
-      },
-      {
-        "name": "secret-key",
-        "label": "Secret Access Key",
-        "type": "password",
-        "placeholder": "S3 credential secret access key"
-      },
-      {
-        "name": "aws-region",
-        "label": "Region",
-        "type": "text",
-        "placeholder": "AWS region"
-      }
-    ]
-  },
-  {
-    "type": "sftp",
-    "description": "SFTP configuration",
-    "options": [
-      {
-        "name": "sftp-user",
-        "label": "User",
-        "type": "text",
-        "placeholder": "sftp user"
-      },
-      {
-        "name": "sftp-host",
-        "label": "Host",
-        "type": "text",
-        "placeholder": "sftp host"
-      },
-      {
-        "name": "sftp-pem",
-        "label": "Pem file",
-        "type": "textarea",
-        "placeholder": "pem file content"
-      }
-    ]
-  }
+    {
+        "type": "s3",
+        "description": "S3 access configuration",
+        "options": [
+            {
+                "name": "access-key",
+                "label": "Access Key Id",
+                "type": "text",
+                "placeholder": "S3 credential access key id"
+            },
+            {
+                "name": "secret-key",
+                "label": "Secret Access Key",
+                "type": "password",
+                "placeholder": "S3 credential secret access key"
+            },
+            {
+                "name": "aws-region",
+                "label": "Region",
+                "type": "text",
+                "placeholder": "AWS region"
+            }
+        ]
+    },
+    {
+        "type": "sftp",
+        "description": "SFTP configuration",
+        "options": [
+            {
+                "name": "sftp-user",
+                "label": "User",
+                "type": "text",
+                "placeholder": "sftp user"
+            },
+            {
+                "name": "sftp-host",
+                "label": "Host",
+                "type": "text",
+                "placeholder": "sftp host"
+            },
+            {
+                "name": "sftp-pem",
+                "label": "Pem file",
+                "type": "textarea",
+                "placeholder": "pem file content"
+            }
+        ]
+    }
 ]

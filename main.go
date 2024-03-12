@@ -126,6 +126,10 @@ func main() {
 	repositoriesC := controllers.Repositories{
 		RepositoryService: repositoryService,
 	}
+	repositoriesC.Templates.Index = views.Must(views.ParseFS(
+		templates.FS,
+		"tailwind.gohtml", "repositories/index.html",
+	))
 	repositoriesC.Templates.New = views.Must(views.ParseFS(
 		templates.FS,
 		"tailwind.gohtml", "repositories/new.gohtml",
@@ -152,6 +156,7 @@ func main() {
 
 	r.Route("/repositories", func(r chi.Router) {
 		r.Use(umw.RequireUser)
+		r.Get("/", repositoriesC.Index)
 		r.Post("/", repositoriesC.Create)
 		r.Get("/new", repositoriesC.New)
 	})
