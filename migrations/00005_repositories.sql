@@ -6,8 +6,12 @@ CREATE TABLE repositories (
     "destination" TEXT NOT NULL,
     "password_enc" VARCHAR(255) NOT NULL,
     "type_id" INT NOT NULL,
+    "owner_id" INT NOT NULL,
     CONSTRAINT fk_types
         FOREIGN KEY ("type_id") REFERENCES repository_types(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_owners
+        FOREIGN KEY ("owner_id") REFERENCES users(id)
         ON DELETE CASCADE
 );
 -- +goose StatementEnd
