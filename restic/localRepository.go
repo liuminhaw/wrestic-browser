@@ -62,16 +62,16 @@ func (r *LocalRepository) connect() error {
 // The ID of the newly created repository is returned.
 // If an error occurs during the database operation, it is wrapped
 // and returned as an error.
-func (r *LocalRepository) newRepo(DB *sql.DB) error {
+func (r *LocalRepository) newRepo(DB *sql.DB, userId int) error {
 	row := DB.QueryRow(`
-		INSERT INTO "repositories" ("name", "destination", "password_enc", "type_id")
+		INSERT INTO "repositories" ("name", "destination", "password_enc", "type_id", "owner_id")
 		VALUES ($1, $2, $3, (
 			SELECT "id"
 			FROM "repository_types"
 			WHERE "name" = $4
-		))		
+		), $5)		
 		RETURNING ID;
-	`, r.Name, r.Destination, r.Encryption.PasswordEnc, localType)
+	`, r.Name, r.Destination, r.Encryption.PasswordEnc, localType, userId)
 	err := row.Scan(&r.Id)
 	if err != nil {
 		return fmt.Errorf("create local repository: %w", err)

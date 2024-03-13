@@ -16,7 +16,7 @@ const (
 
 type Repository interface {
 	connect() error
-	newRepo(*sql.DB) error
+	newRepo(*sql.DB, int) error
 	GenEnc([32]byte) error
 }
 
@@ -66,8 +66,8 @@ func (service *RepositoryService) Connect() error {
 // Create creates a new repository.
 // It calls the newRepo method of the RepositoryService to initialize the repository.
 // If an error occurs during the creation process, it returns an error with a formatted message.
-func (service *RepositoryService) Create() error {
-	if err := service.Repository.newRepo(service.DB); err != nil {
+func (service *RepositoryService) Create(userId int) error {
+	if err := service.Repository.newRepo(service.DB, userId); err != nil {
 		return fmt.Errorf("create repository: %w", err)
 	}
 

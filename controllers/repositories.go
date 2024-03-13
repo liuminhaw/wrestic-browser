@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/liuminhaw/wrestic-brw/context"
 	"github.com/liuminhaw/wrestic-brw/restic"
 	"github.com/liuminhaw/wrestic-brw/views"
 )
@@ -47,6 +48,7 @@ func (rep Repositories) New(w http.ResponseWriter, r *http.Request) {
 
 func (rep Repositories) Create(w http.ResponseWriter, r *http.Request) {
 	repoType := r.FormValue("type")
+	userId := context.User(r.Context()).ID
 
 	switch repoType {
 	case "local":
@@ -98,7 +100,7 @@ func (rep Repositories) Create(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Failed to connect to repository")
 		return
 	}
-	if err := rep.RepositoryService.Create(); err != nil {
+	if err := rep.RepositoryService.Create(userId); err != nil {
 		fmt.Printf("Create new repository failed: %s\n", err)
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprintf(w, "Failed to create new repository")

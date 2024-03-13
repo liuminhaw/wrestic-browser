@@ -128,21 +128,21 @@ func (r *SftpRepository) connect() error {
 // The function inserts the repository details into the "repositories" table,
 // and the SFTP repository configuration into the "sftp_repository_configs" table.
 // It uses a transaction to ensure atomicity and rolls back the transaction if any error occurs.
-func (r *SftpRepository) newRepo(DB *sql.DB) error {
+func (r *SftpRepository) newRepo(DB *sql.DB, userId int) error {
 	tx, err := DB.Begin()
 	if err != nil {
 		return fmt.Errorf("create sftp repository: new transaction: %w", err)
 	}
 
 	row := tx.QueryRow(`
-		INSERT INTO "repositories" ("name", "destination", "password_enc", "type_id")
+		INSERT INTO "repositories" ("name", "destination", "password_enc", "type_id", "owner_id")
 		VALUES ($1, $2, $3, (
 			SELECT "id"
 			FROM "repository_types"
 			WHERE "name" = $4
-		))
+		), $5)
 		RETURNING ID;
-	`, r.Name, r.Destination, r.Encryption.PasswordEnc, sftpType)
+	`, r.Name, r.Destination, r.Encryption.PasswordEnc, sftpType, userId)
 	err = row.Scan(&r.Id)
 	if err != nil {
 		if rbErr := tx.Rollback(); rbErr != nil {
