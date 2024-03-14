@@ -63,7 +63,12 @@ func (r *LocalRepository) connect() error {
 // If an error occurs during the database operation, it is wrapped
 // and returned as an error.
 func (r *LocalRepository) newRepo(DB *sql.DB, userId int) error {
-	row := DB.QueryRow(`
+    tx, err := DB.Begin()
+    if err != nil {
+        return fmt.Errorf("create local repository: new transaction: %w", err)
+    }
+
+	row := tx.QueryRow(`
 		INSERT INTO "repositories" ("name", "destination", "password_enc", "type_id", "owner_id")
 		VALUES ($1, $2, $3, (
 			SELECT "id"
@@ -72,10 +77,29 @@ func (r *LocalRepository) newRepo(DB *sql.DB, userId int) error {
 		), $5)		
 		RETURNING ID;
 	`, r.Name, r.Destination, r.Encryption.PasswordEnc, localType, userId)
-	err := row.Scan(&r.Id)
+	err = row.Scan(&r.Id)
 	if err != nil {
+        if rbErr := tx.Rollback(); rbErr != nil {
+            return fmt.Errorf("create local repository: transaction rollback: %w", rbErr)
+        }
 		return fmt.Errorf("create local repository: %w", err)
 	}
+
+    _, err = tx.Exec(`
+        INSERT INTO "repository_settings" ("snapshot_check_interval", "repository_id")
+        VALUES ($1, $2);
+    `, defaultSnapshotCheckInterval, r.Id)
+    if err != nil {
+        if rbErr := tx.Rollback(); rbErr != nil {
+            return fmt.Errorf("create local repository: transaction rollback: %w", rbErr)
+        }
+        return fmt.Errorf("create local repository settings: %w", err)
+    }
+
+    err = tx.Commit()
+    if err != nil {
+        return fmt.Errorf("create local repository: transaction comimt: %w", err)
+    }
 
 	return nil
 }

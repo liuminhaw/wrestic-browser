@@ -3,6 +3,7 @@ package restic
 import (
 	"database/sql"
 	"fmt"
+	"time"
 )
 
 const (
@@ -12,6 +13,8 @@ const (
 	localType string = "local"
 	s3Type    string = "s3"
 	sftpType  string = "sftp"
+
+	defaultSnapshotCheckInterval = 1 * 24 * time.Hour
 )
 
 type Repository interface {

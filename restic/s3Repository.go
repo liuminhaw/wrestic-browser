@@ -114,6 +114,17 @@ func (r *S3Repository) newRepo(DB *sql.DB, userId int) error {
 		return fmt.Errorf("create s3 repository config: %w", err)
 	}
 
+    _, err = tx.Exec(`
+        INSERT INTO "repository_settings" ("snapshot_check_interval", "repository_id")
+        VALUES ($1, $2);
+    `, defaultSnapshotCheckInterval, r.Id)
+    if err != nil {
+        if rbErr := tx.Rollback(); rbErr != nil {
+            return fmt.Errorf("create s3 repository: transaction rollback: %w", rbErr)
+        }
+        return fmt.Errorf("create s3 repository settings: %w", err)
+    }
+
 	err = tx.Commit()
 	if err != nil {
 		return fmt.Errorf("create s3 repository: transaction commit: %w", err)
