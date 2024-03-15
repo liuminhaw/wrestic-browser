@@ -15,11 +15,40 @@ type Repositories struct {
 		Index Template
 	}
 
-	RepositoryService *restic.RepositoryService
+	RepositoryService       *restic.RepositoryService
+	RepositoryStatusService *restic.RepositoryStatusService
 }
 
 func (rep Repositories) Index(w http.ResponseWriter, r *http.Request) {
-	rep.Templates.Index.Execute(w, r, nil)
+	var data struct {
+		Settings []struct {
+			Name       string
+			Status     string
+			LastBackup string
+			Owner      string
+		}
+	}
+	statuses, err := rep.RepositoryStatusService.List()
+	if err != nil {
+		fmt.Printf("Repository indices: %s\n", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
+
+	for _, status := range statuses {
+		data.Settings = append(data.Settings, struct {
+			Name       string
+			Status     string
+			LastBackup string
+			Owner      string
+		}{
+			Name:       status.Name,
+			Status:     status.Status,
+			LastBackup: status.LastBackup,
+			Owner:      status.Owner,
+		})
+	}
+
+	rep.Templates.Index.Execute(w, r, data)
 }
 
 func (rep Repositories) New(w http.ResponseWriter, r *http.Request) {

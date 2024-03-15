@@ -102,6 +102,9 @@ func main() {
 		DB:     db,
 		EncKey: cfg.Encryption.Key,
 	}
+	repositoryStatusService := &restic.RepositoryStatusService{
+		DB: db,
+	}
 
 	// Setup middleware
 	umw := controllers.UserMiddleware{
@@ -124,7 +127,8 @@ func main() {
 		"tailwind.gohtml", "default.gohtml", "signin.gohtml",
 	))
 	repositoriesC := controllers.Repositories{
-		RepositoryService: repositoryService,
+		RepositoryService:       repositoryService,
+		RepositoryStatusService: repositoryStatusService,
 	}
 	repositoriesC.Templates.Index = views.Must(views.ParseFS(
 		templates.FS,
@@ -148,7 +152,9 @@ func main() {
 	r.Post("/signin", usersC.ProcessSignIn)
 	r.Post("/signout", usersC.ProcessSignOut)
 
-	tpl := views.Must(views.ParseFS(templates.FS, "tailwind.gohtml", "default.gohtml", "home.gohtml"))
+	tpl := views.Must(
+		views.ParseFS(templates.FS, "tailwind.gohtml", "default.gohtml", "home.gohtml"),
+	)
 	r.Route("/hello", func(r chi.Router) {
 		r.Use(umw.RequireUser)
 		r.Get("/", controllers.StaticHandler(tpl))
@@ -171,7 +177,6 @@ func main() {
 		Handler: r,
 	}
 	err = server.ListenAndServe()
-
 }
 
 // func TimerMiddleware(h http.HandlerFunc) http.HandlerFunc {
